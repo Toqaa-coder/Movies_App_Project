@@ -7,9 +7,7 @@ margin: 0;
 font-family: Arial, sans-serif;
 }
 
-/* ===================================================
-NAVBAR (بند 4) — أضفناه هنا
-=================================================== */
+
 .navbar {
 position: fixed;
 top: 0;
@@ -134,9 +132,6 @@ font-weight: bold;
 cursor: pointer;
 }
 
-/* ===================================================
-ALPHA SEARCH (בند 5) — أضفناه هنا
-=================================================== */
 #alpha-section {
 margin-top: 20px;
 padding: 0 20px 40px;
@@ -262,9 +257,6 @@ font-size: 15px;
 padding: 16px 0;
 }
 
-/* ===================================================
-OLD STYLES (بدون تغيير)
-=================================================== */
 .logo {
 color: #e50914;
 padding: 15px;
@@ -283,7 +275,7 @@ align-items: flex-end;
 padding: 40px;
 transition: background-image 1s ease-in-out;
 overflow: hidden;
-margin-top: 68px; /* ← مهم: عشان الـ hero ما يتغطى بالـ navbar */
+margin-top: 68px; 
 }
 
 #hero::before {
