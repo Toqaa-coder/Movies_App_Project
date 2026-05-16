@@ -1,0 +1,296 @@
+body{
+    background-color: #141414;
+    color: white;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* LOGO */
+.logo{
+    color: #e50914;
+    padding: 15px;
+    font-size: 30px;
+    font-weight: bold;
+}
+
+#hero{
+    height: 420px;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    padding: 40px;
+    transition: background-image 1s ease-in-out;
+
+    overflow: hidden; 
+}
+
+/* overlay */
+#hero::before{
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to top,
+        rgba(0,0,0,0.9),
+        rgba(0,0,0,0.3),
+        transparent
+    );
+    z-index: 1;
+}
+
+.hero-buttons,
+#hero-title,
+#hero-meta,
+.hero-content{
+    position: relative;
+    z-index: 2;
+}
+.hero-buttons button{
+    padding: 10px 18px;
+    margin-right: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: transform 0.2s ease, background 0.2s;
+}
+
+.hero-buttons button:hover{
+    transform: scale(1.15);
+}
+.hero-ad{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0,0,0,0.85);
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center;
+    width: 60%;
+    z-index: 999;
+}
+
+.hidden{
+    display: none;
+}
+/* SECTION TITLE */
+.section-title{
+    margin-left: 20px;
+    margin-top: 20px;
+    font-size: 22px;
+}
+
+/* ROW */
+.row-row{
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding: 20px;
+    scroll-behavior: smooth;
+}
+
+.row-row::-webkit-scrollbar{
+    display: none;
+}
+
+/* CARD */
+.post{
+    min-width: 200px;
+    background-color: #222;
+    border-radius: 10px;
+    overflow: hidden;
+    transition: 0.3s;
+    flex-shrink: 0;
+    position: relative;
+    cursor: pointer;
+}
+
+.post:hover{
+    transform: scale(1.08);
+}
+
+/* IMAGE */
+.post-thumb{
+    width: 100%;
+    height: 130px;
+    object-fit: cover;
+    object-position: top;
+    display: block;
+}
+
+/* RED WATCH BAR */
+.progress-bar{
+    width: 100%;
+    height: 5px;
+    background: #444;
+}
+
+.progress{
+    height: 100%;
+    background: #e50914;
+}
+
+/* OVERLAY INFO */
+.post-overlay{
+    padding: 10px;
+    background-color: #181818;
+}
+
+.overlay-title{
+    font-size: 15px;
+    font-weight: bold;
+    margin-bottom: 6px;
+}
+
+.overlay-meta{
+    font-size: 12px;
+    color: #b3b3b3;
+    margin-bottom: 8px;
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.match{
+    color: #46d369;
+    font-weight: bold;
+}
+
+/* ACTIONS */
+.overlay-actions{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+/* LIKE BUTTON */
+.like-btn{
+    background: none;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 18px;
+    transition: 0.2s;
+}
+
+.like-btn:hover{
+    transform: scale(1.2);
+}
+
+.liked{
+    color: #e50914;
+}
+
+/* GENRE TAG */
+.genre-tag{
+    background-color: #333;
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 11px;
+}
+.animate-heart{
+    animation: popHeart 0.3s ease;
+}
+
+@keyframes popHeart{
+    0%{
+        transform: scale(1);
+    }
+    50%{
+        transform: scale(1.6);
+    }
+    100%{
+        transform: scale(1);
+    }
+}
+.row-wrapper{
+    position: relative;
+}
+
+.scroll-btn{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border: none;
+    font-size: 30px;
+    width: 40px;
+    height: 80px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.scroll-btn.left{
+    left: 0;
+}
+
+.scroll-btn.right{
+    right: 0;
+}
+.hero-arrow{
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0,0,0,0.5);
+    border: none;
+    color: white;
+    font-size: 30px;
+    width: 40px;
+    height: 80px;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.hero-arrow.left{
+    left: 10px;
+}
+
+.hero-arrow.right{
+    right: 10px;
+}
+
+/* dots */
+.hero-dots{
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 10;
+}
+
+.dot{
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: gray;
+    opacity: 0.5;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.dot.active{
+    width: 14px;
+    height: 14px;
+    background: white;
+    opacity: 1;
+}
+.content-badge{
+    position: absolute;
+    top: 12px;
+    left: -5px;
+    background: #e50914;
+    color: white;
+    font-size: 9px;
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 0 4px 4px 0;
+    z-index: 8;
+    letter-spacing: 1px;
+}
