@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Netflix Project - Aya</title>
+    <title>Netflix Project</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="feed.css">
 </head>
@@ -11,18 +11,18 @@
 
     <nav class="navbar" id="mainNav">
         <div class="navbar-left">
-            <a href="#" class="netflix-logo">NETFLIX</a>
+            <a href="persona.html" class="netflix-logo">NETFLIX</a>
             <ul class="nav-links">
                 <li><a href="#" class="active">Home</a></li>
                 <li><a href="#">TV Shows</a></li>
                 <li><a href="#">Movies</a></li>
                 <li><a href="#">Games</a></li>
-                <li><a href="#">New & Popular</a></li>
+                <li><a href="#">New &amp; Popular</a></li>
                 <li><a href="#">My List</a></li>
                 <li><a href="#">Browse by Languages</a></li>
             </ul>
         </div>
-        
+
         <div class="navbar-right">
             <div class="nav-search-container">
                 <div class="nav-search-box open">
@@ -31,7 +31,8 @@
                 <button class="nav-search-icon">🔍</button>
             </div>
             <button class="alpha-btn" onclick="sortAlphabetically()">A-Z</button>
-            <div class="nav-avatar">A</div>
+            <div class="nav-avatar" id="nav-avatar">A</div>
+            <button class="logout-nav-btn" onclick="doLogout()">Sign Out</button>
         </div>
     </nav>
 
@@ -79,4 +80,3 @@
     <script src="feed.js"></script>
 </body>
 </html>
-

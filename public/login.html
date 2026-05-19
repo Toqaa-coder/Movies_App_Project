@@ -2,101 +2,90 @@
 <html lang="he" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>Netflix – התחברות</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
-        body {
-            background: #141414;
-            color: white;
-            font-family: Arial, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-        }
-
-        .login-box {
-            background: rgba(0,0,0,0.75);
-            border-radius: 8px;
-            padding: 60px 68px;
-            width: 400px;
-        }
-
-        .logo {
-            color: #e50914;
-            font-size: 32px;
-            font-weight: 900;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        h2 {
-            font-size: 28px;
-            margin-bottom: 24px;
-        }
-
-        input {
-            width: 100%;
-            padding: 14px;
-            margin-bottom: 14px;
-            background: #333;
-            border: none;
-            border-radius: 4px;
-            color: white;
-            font-size: 15px;
-            outline: none;
-        }
-
-        input:focus { background: #454545; }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            background: #e50914;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: background 0.2s;
-        }
-
-        button:hover { background: #c40812; }
-
-        #error-msg {
-            color: #e87c03;
-            font-size: 13px;
-            margin-top: 10px;
-            text-align: center;
-            min-height: 20px;
-        }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Netflix Israel - כניסה</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="https://assets.nflxext.com/ffe/siteui/common/icons/nficon2016.ico">
 </head>
 <body>
 
-<div class="login-box">
-    <div class="logo">NETFLIX</div>
-    <h2>התחברות</h2>
+    <div id="intro-screen">
+        <h1 class="netflix-intro-text">NETFLIX</h1>
+    </div>
 
-    <input type="text"     id="username" placeholder="שם משתמש">
-    <input type="password" id="password" placeholder="סיסמא">
+    <div class="netflix-bg">
+        <div class="overlay-dark"></div>
+    </div>
 
-    <button onclick="doLogin()">כניסה</button>
+    <header class="top-header">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg" alt="Netflix" class="nf-logo">
+    </header>
 
-    <div id="error-msg"></div>
-</div>
+    <main class="login-container">
+        <div class="login-card">
+            <h1>כניסה</h1>
+
+            <div class="input-wrapper">
+                <input type="text" id="username" placeholder="שם משתמש">
+            </div>
+            <div class="input-wrapper">
+                <input type="password" id="password" placeholder="סיסמה">
+            </div>
+
+            <button class="login-btn" onclick="doLogin()">כניסה</button>
+
+            <div class="or-separator">או</div>
+            <button type="button" class="code-btn">שימוש בקוד כניסה</button>
+
+            <div class="forgot-password">
+                <a href="#">שכחת את הסיסמה?</a>
+            </div>
+
+            <div class="extra-options">
+                <label class="check-container">
+                    <input type="checkbox" checked>
+                    <span>זכור אותי</span>
+                </label>
+            </div>
+
+            <div id="error-msg" style="color:#e87c03;font-size:13px;margin-top:12px;text-align:center;min-height:20px;"></div>
+
+            <div class="login-footer">
+                <div class="signup-text">
+                    חדש ב-Netflix? <a href="#">הרשמה עכשיו.</a>
+                </div>
+                <div class="recaptcha-text">
+                    הדף מוגן באמצעות reCAPTCHA של Google. <a href="#">פרטים נוספים.</a>
+                </div>
+            </div>
+        </div>
+    </main>
 
 <script>
+// אם כבר מחובר עבור לפרופילים
+const existingToken = localStorage.getItem('token');
+if (existingToken) {
+    fetch('/api/session-check', { headers: { 'x-auth-token': existingToken } })
+        .then(r => r.json())
+        .then(data => { if (data.valid) window.location.href = '/profiles.html'; });
+}
+
 async function doLogin() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
-    const errorEl = document.getElementById("error-msg");
+    const errorEl  = document.getElementById("error-msg");
 
+    // Client-side validation
     if (!username || !password) {
-        errorEl.textContent = "נא למלא שם משתמש וסיסמא";
+        errorEl.textContent = "נא למלא שם משתמש וסיסמה";
+        return;
+    }
+    if (username.length < 2) {
+        errorEl.textContent = "שם משתמש חייב להכיל לפחות 2 תווים";
+        return;
+    }
+    if (password.length < 4) {
+        errorEl.textContent = "סיסמה חייבת להכיל לפחות 4 תווים";
         return;
     }
 
@@ -109,7 +98,8 @@ async function doLogin() {
     const data = await response.json();
 
     if (data.success) {
-        window.location.href = "/feed.html";
+        localStorage.setItem('token', data.token);
+        window.location.href = '/profiles.html';
     } else {
         errorEl.textContent = data.message;
     }
@@ -119,7 +109,5 @@ document.addEventListener("keydown", e => {
     if (e.key === "Enter") doLogin();
 });
 </script>
-
 </body>
 </html>
-
