@@ -1,69 +1,33 @@
-if (!localStorage.getItem("catalog")) {
-    const catalog = [
-        { id: 1, title: "The WONDERfools", year: 2026, genre: "Fantasy", type: "Series", row: "trending", img: "https://upload.wikimedia.org/wikipedia/en/thumb/b/bd/The_Wonderfools_poster.png/250px-The_Wonderfools_poster.png", likes: 920 },
-        { id: 2, title: "The Last of Us", year: 2023, genre: "Drama", type: "Series", row: "trending", img: "https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7J78ED.jpg", likes: 1500 },
-        { id: 3, title: "Breaking Bad", year: 2008, genre: "Crime", type: "Series", row: "trending", img: "https://image.tmdb.org/t/p/w500/ggFHVNu6YYI5L9pCfOacjizRGt.jpg", likes: 1500 },
-        { id: 9, title: "Love is Blind", year: 2020, genre: "Reality", type: "Series", row: "reality", img: "https://m.media-amazon.com/images/M/MV5BNDk5OGRjZDEtMjc3Yi00Y2QxLWI3ZmYtNDY2NmYyMzlhZWU3XkEyXkFqcGc@._V1_.jpg", likes: 546 },
-        { id: 15, title: "Wednesday", year: 2022, genre: "Comedy", type: "Series", row: "continue", img: "https://image.tmdb.org/t/p/w500/9PFonBhy4cQy7Jz20NpMygczOkv.jpg", likes: 2800, progress: 45 }
-    ];
-    localStorage.setItem("catalog", JSON.stringify(catalog));
+const TOKEN = localStorage.getItem('token');
+
+// Guard — must be logged in
+if (!TOKEN) window.location.href = '/';
+
+/* ── Show active persona name in navbar ── */
+const persona = JSON.parse(sessionStorage.getItem('persona') || '{}');
+const avatarEl = document.getElementById('nav-avatar');
+if (avatarEl && persona.name) {
+    avatarEl.textContent  = persona.avatar || persona.name[0];
+    avatarEl.style.background = persona.color || '#e50914';
+    avatarEl.title = persona.name;
 }
 
-let heroIndex = 0;
-let heroItems = [];
-
-document.addEventListener("DOMContentLoaded", () => {
-    const catalog = JSON.parse(localStorage.getItem("catalog")) || [];
-    
-    heroItems = catalog.filter(item => item.row === "trending");
-    if (heroItems.length > 0) setHero(heroItems[0]);
-
-    renderAllRows(catalog);
+/* ── Navbar scroll ── */
+window.addEventListener("scroll", () => {
+    const nav = document.getElementById("mainNav");
+    if (nav) nav.classList.toggle("scrolled", window.scrollY > 50);
 });
 
-function renderAllRows(data) {
-    renderRow("row-trending", data.filter(i => i.row === "trending"));
-    renderRow("row-reality", data.filter(i => i.row === "reality"));
-    renderRow("row-continue", data.filter(i => i.row === "continue"));
-}
-
-function renderRow(containerId, items) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    container.innerHTML = "";
-
-    items.forEach(item => {
-        let progressBar = item.row === "continue" ? `<div class="progress-bar"><div class="progress" style="width:${item.progress}%"></div></div>` : "";
-        container.innerHTML += `
-            <div class="post">
-                <img class="post-thumb" src="${item.img}" alt="${item.title}">
-                ${progressBar}
-                <div class="post-overlay">
-                    <div class="overlay-title">${item.title}</div>
-                    <div class="overlay-meta"><span>${item.year}</span> • <span>${item.genre}</span></div>
-                    <button class="btn btn-sm btn-danger mt-2" onclick="addLike(${item.id})">♥️ <span id="likes-${item.id}">${item.likes}</span></button>
-                </div>
-            </div>`;
-    });
-}
-
-function filterMovies() {
-    const term = document.getElementById("searchInput").value.toLowerCase();
-    const catalog = JSON.parse(localStorage.getItem("catalog"));
-    const filtered = catalog.filter(item => item.title.toLowerCase().includes(term));
-    renderAllRows(filtered);
-}
-
-function sortAlphabetically() {
-    const catalog = JSON.parse(localStorage.getItem("catalog"));
-    catalog.sort((a, b) => a.title.localeCompare(b.title));
-    renderAllRows(catalog);
-}
+/* ── Hero state ── */
+let heroItems = [];
+let heroIndex  = 0;
+let heroTimer  = null;
 
 function setHero(item) {
     document.getElementById("hero").style.backgroundImage = `url(${item.img})`;
     document.getElementById("hero-title").textContent = item.title;
-    document.getElementById("hero-meta").innerHTML = `<span>${item.year}</span> | <span>${item.genre}</span>`;
+    document.getElementById("hero-meta").textContent  = `${item.year} • ${item.genre} • ${item.type}`;
+    updateDots();
 }
 
 function nextHero() {
@@ -76,17 +40,147 @@ function prevHero() {
     setHero(heroItems[heroIndex]);
 }
 
-function scrollRow(id, amount) {
-    document.getElementById(id).scrollBy({ left: amount, behavior: 'smooth' });
+function goToHero(index) {
+    heroIndex = index;
+    setHero(heroItems[heroIndex]);
 }
 
-function addLike(id) {
-    let catalog = JSON.parse(localStorage.getItem("catalog"));
-    let item = catalog.find(i => i.id === id);
-    if (item) {
-        item.likes++;
-        localStorage.setItem("catalog", JSON.stringify(catalog));
-        document.getElementById(`likes-${id}`).innerText = item.likes;
+function renderDots() {
+    const dots = document.getElementById("hero-dots");
+    dots.innerHTML = "";
+    heroItems.forEach((_, i) => {
+        dots.innerHTML += `<div class="dot" onclick="goToHero(${i})"></div>`;
+    });
+    updateDots();
+}
+
+function updateDots() {
+    document.querySelectorAll(".dot").forEach((dot, i) => {
+        dot.classList.toggle("active", i === heroIndex);
+    });
+}
+
+window.nextHero  = nextHero;
+window.prevHero  = prevHero;
+window.goToHero  = goToHero;
+
+/* ── Fetch catalog from server ── */
+async function loadCatalog() {
+    const res = await fetch('/api/catalog', { headers: { 'x-auth-token': TOKEN } });
+
+    if (res.status === 401) {
+        localStorage.removeItem('token');
+        window.location.href = '/';
+        return;
+    }
+
+    const catalog = await res.json();
+
+    heroItems = catalog.filter(i => i.row === "trending" || i.type === "Movie");
+    setHero(heroItems[0]);
+    renderDots();
+
+    if (heroTimer) clearInterval(heroTimer);
+    heroTimer = setInterval(nextHero, 5000);
+
+    renderRow("row-trending", catalog.filter(i => i.row === "trending" && !i.isAd));
+    renderRow("row-reality",  catalog.filter(i => i.row === "reality"));
+    renderRow("row-continue", catalog.filter(i => i.row === "continue"));
+
+    // keep a local copy for search/sort
+    window._catalog = catalog;
+}
+
+/* ── Render row ── */
+function renderRow(containerId, items) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.innerHTML = "";
+
+    items.forEach(item => {
+        let progressBar = "";
+        let badgeHTML   = "";
+
+        if (item.badge) badgeHTML = `<div class="content-badge">${item.badge}</div>`;
+
+        if (item.row === "continue") {
+            progressBar = `
+                <div class="progress-bar">
+                    <div class="progress" style="width:${item.progress}%"></div>
+                </div>`;
+        }
+
+        container.innerHTML += `
+            <div class="post">
+                ${badgeHTML}
+                <img class="post-thumb" src="${item.img}" alt="${item.title}">
+                ${progressBar}
+                <div class="post-overlay">
+                    <div class="overlay-title">${item.title}</div>
+                    <div class="overlay-meta">
+                        <span class="match">97% Match</span>
+                        <span>${item.year}</span>
+                        <span>${item.type}</span>
+                    </div>
+                    <div class="overlay-actions">
+                        <button class="like-btn" onclick="addLike(${item.id}, this)">♥</button>
+                        <span class="like-count" id="likes-${item.id}">${item.likes}</span>
+                        <span class="genre-tag">${item.genre}</span>
+                    </div>
+                </div>
+            </div>`;
+    });
+}
+
+/* ── Like — call server ── */
+async function addLike(id, button) {
+    const res  = await fetch(`/api/catalog/${id}/like`, {
+        method: 'POST',
+        headers: { 'x-auth-token': TOKEN }
+    });
+    const data = await res.json();
+    if (data.success) {
+        document.getElementById(`likes-${id}`).innerText = data.likes;
+        button.classList.toggle("liked");
+        button.classList.add("animate-heart");
+        setTimeout(() => button.classList.remove("animate-heart"), 300);
+
+        // update local copy
+        const item = (window._catalog || []).find(m => m.id === id);
+        if (item) item.likes = data.likes;
     }
 }
 
+/* ── Search / Sort ── */
+function filterMovies() {
+    const term    = document.getElementById("searchInput").value.toLowerCase();
+    const catalog = window._catalog || [];
+    const filtered = catalog.filter(i => i.title.toLowerCase().includes(term));
+    renderRow("row-trending", filtered.filter(i => i.row === "trending"));
+    renderRow("row-reality",  filtered.filter(i => i.row === "reality"));
+    renderRow("row-continue", filtered.filter(i => i.row === "continue"));
+}
+
+function sortAlphabetically() {
+    const catalog = [...(window._catalog || [])];
+    catalog.sort((a, b) => a.title.localeCompare(b.title));
+    renderRow("row-trending", catalog.filter(i => i.row === "trending"));
+    renderRow("row-reality",  catalog.filter(i => i.row === "reality"));
+    renderRow("row-continue", catalog.filter(i => i.row === "continue"));
+}
+
+/* ── Scroll row ── */
+function scrollRow(id, value) {
+    document.getElementById(id).scrollBy({ left: value, behavior: "smooth" });
+}
+
+/* ── Logout from feed ── */
+async function doLogout() {
+    await fetch('/logout', { method: 'POST', headers: { 'x-auth-token': TOKEN } });
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('persona');
+    window.location.href = '/';
+}
+
+/* ── Init ── */
+document.addEventListener("DOMContentLoaded", loadCatalog);
