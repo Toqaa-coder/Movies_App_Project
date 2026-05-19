@@ -36,11 +36,12 @@ function validateSession(token) {
 
 /* ── PERSONAS (in-memory) ── */
 let personas = [
-    { id: 1, name: "Paul",  avatar: "P", color: "#e50914" },
-    { id: 2, name: "Admin", avatar: "A", color: "#833ab4" },
-    { id: 3, name: "Kids",  avatar: "K", color: "#1db954" }
+    { id: 1, name: "Anna",  img: "https://i.pravatar.cc/150?img=47" },
+    { id: 2, name: "Ronni", img: "https://i.pravatar.cc/150?img=52" },
+    { id: 3, name: "Lior",  img: "https://i.pravatar.cc/150?img=33" },
+    { id: 4, name: "Alon",  img: "https://i.pravatar.cc/150?img=68" }
 ];
-let nextPersonaId = 4;
+let nextPersonaId = 5;
 
 /* ── CATALOG (in-memory JSON array) ── */
 const catalog = [
