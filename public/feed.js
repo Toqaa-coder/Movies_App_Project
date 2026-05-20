@@ -7,9 +7,9 @@ if (!TOKEN) window.location.href = '/';
 const persona = JSON.parse(sessionStorage.getItem('persona') || '{}');
 const avatarEl = document.getElementById('nav-avatar');
 if (avatarEl && persona.name) {
-    avatarEl.textContent  = persona.avatar || persona.name[0];
+    avatarEl.textContent      = persona.name[0].toUpperCase();
     avatarEl.style.background = persona.color || '#e50914';
-    avatarEl.title = persona.name;
+    avatarEl.title            = persona.name;
 }
 
 /* ── Navbar scroll ── */
@@ -87,7 +87,6 @@ async function loadCatalog() {
     renderRow("row-reality",  catalog.filter(i => i.row === "reality"));
     renderRow("row-continue", catalog.filter(i => i.row === "continue"));
 
-    // keep a local copy for search/sort
     window._catalog = catalog;
 }
 
@@ -145,7 +144,6 @@ async function addLike(id, button) {
         button.classList.add("animate-heart");
         setTimeout(() => button.classList.remove("animate-heart"), 300);
 
-        // update local copy
         const item = (window._catalog || []).find(m => m.id === id);
         if (item) item.likes = data.likes;
     }
@@ -183,4 +181,10 @@ async function doLogout() {
 }
 
 /* ── Init ── */
-document.addEventListener("DOMContentLoaded", loadCatalog);
+document.addEventListener("DOMContentLoaded", () => {
+    const welcomeEl = document.getElementById('welcome-msg');
+    if (welcomeEl && persona.name) {
+        welcomeEl.textContent = `Welcome back, ${persona.name}!`;
+    }
+    loadCatalog();
+});
