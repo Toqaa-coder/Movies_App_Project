@@ -50,3 +50,41 @@ app.post('/login', (req, res) => {
 app.listen(PORT, () => {
     console.log(`🚀 Server running at http://localhost:${PORT}`);
 });
+// ====================== PROFILES ROUTES ======================
+
+// שליפת כל הפרופילים
+app.get('/profiles', (req, res) => {
+    const username = req.cookies.username;
+    if (!username) {
+        return res.status(401).json({ success: false, message: "לא מחובר" });
+    }
+    
+    const userProfiles = profiles.filter(p => p.username === username);
+    res.json({ success: true, profiles: userProfiles });
+});
+
+// הוספת פרופיל חדש
+app.post('/profiles', (req, res) => {
+    const username = req.cookies.username;
+    if (!username) {
+        return res.status(401).json({ success: false, message: "לא מחובר" });
+    }
+
+    const { profileName } = req.body;
+
+    if (!profileName || profileName.trim() === "") {
+        return res.json({ success: false, message: "שם פרופיל חייב להיות מלא" });
+    }
+
+    const newProfile = {
+        id: Date.now(),
+        username: username,
+        profileName: profileName.trim(),
+        avatar: profileName.charAt(0).toUpperCase(),
+        color: "#" + Math.floor(Math.random()*16777215).toString(16)
+    };
+
+    profiles.push(newProfile);
+    
+    res.json({ success: true, profile: newProfile });
+});
