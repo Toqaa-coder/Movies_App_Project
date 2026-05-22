@@ -88,3 +88,8 @@ app.post('/profiles', (req, res) => {
     
     res.json({ success: true, profile: newProfile });
 });
+app.post('/logout', (req, res) => {
+    res.clearCookie('authToken');
+    res.clearCookie('username');
+    res.json({ success: true });
+});
