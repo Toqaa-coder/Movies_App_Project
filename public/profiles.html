@@ -66,11 +66,10 @@
 </div>
  
 <script>
-// ── القسم 5: تحقق من الـ token ──
+
 const TOKEN = localStorage.getItem('token');
 if (!TOKEN) window.location.href = '/';
  
-// تحقق من السيرفر إن الـ session لسه صالح
 (async () => {
     const res  = await fetch('/api/session-check', { headers: { 'x-auth-token': TOKEN } });
     const data = await res.json();
@@ -80,7 +79,6 @@ if (!TOKEN) window.location.href = '/';
     }
 })();
  
-// ── القسم 4: تحميل الـ personas من السيرفر ──
 async function loadProfiles() {
     const res = await fetch('/api/personas', {
         headers: { 'x-auth-token': TOKEN }
@@ -129,8 +127,7 @@ function openModal() {
 function closeModal() {
     document.getElementById('modal-overlay').style.display = 'none';
 }
- 
-// ── القسم 4: حفظ الـ persona في السيرفر ──
+
 async function savePersona() {
     const name    = document.getElementById('new-name').value.trim();
     const img     = document.getElementById('new-img').value.trim();
@@ -149,7 +146,7 @@ async function savePersona() {
     else { errorEl.textContent = data.message; }
 }
  
-// ── القسم 5: Logout يمسح الـ session ──
+
 async function doLogout() {
     await fetch('/logout', {
         method: 'POST',

@@ -69,10 +69,7 @@ let profiles = [
     { id: 4, username: "admin",  profileName: "Admin",  avatar: "A", color: "#f5a623" }
 ];
  
-/* ══════════════════════════════════════════
-   PERSONAS  (in-memory) — القسم 4
-   هذا المصفوفة يُستخدم من profiles.html عبر /api/personas
-══════════════════════════════════════════ */
+
 let personas = [
     { id: 1, name: "Anna",  img: "https://i.pravatar.cc/150?img=47" },
     { id: 2, name: "Ronni", img: "https://i.pravatar.cc/150?img=52" },
@@ -141,7 +138,6 @@ app.post('/login', (req, res) => {
     res.json({ success: true, token, username });
 });
  
-// POST /logout  — القسم 5: يمسح الـ session
 app.post('/logout', (req, res) => {
     const token = req.cookies?.authToken || req.headers['x-auth-token'];
     if (token) delete sessions[token];
@@ -150,7 +146,7 @@ app.post('/logout', (req, res) => {
     res.json({ success: true });
 });
  
-// GET /api/session-check  — القسم 5
+
 app.get('/api/session-check', (req, res) => {
     const token = req.cookies?.authToken || req.headers['x-auth-token'];
     const s = validateSession(token);
@@ -161,13 +157,12 @@ app.get('/api/session-check', (req, res) => {
    ROUTES — PROTECTED
 ══════════════════════════════════════════ */
  
-// GET /api/profiles  — شغل صديقاتك، ما تغيّر
+
 app.get('/api/profiles', requireAuth, (req, res) => {
     const userProfiles = profiles.filter(p => p.username === req.username);
     res.json({ success: true, profiles: userProfiles });
 });
- 
-// POST /api/profiles  — شغل صديقاتك، ما تغيّر
+
 app.post('/api/profiles', requireAuth, (req, res) => {
     const { profileName, color } = req.body;
     if (!profileName || profileName.trim() === '') {
@@ -184,14 +179,12 @@ app.post('/api/profiles', requireAuth, (req, res) => {
     res.json({ success: true, profile: newProfile });
 });
  
-// ── القسم 4: GET /api/personas ──
-// يرجع كل الـ personas المحفوظة في السيرفر
+
 app.get('/api/personas', requireAuth, (req, res) => {
     res.json(personas);
 });
  
-// ── القسم 4: POST /api/personas ──
-// يحفظ الـ persona الجديد في مصفوفة السيرفر
+
 app.post('/api/personas', requireAuth, (req, res) => {
     const { name, img } = req.body;
     if (!name || name.trim().length < 1) {
