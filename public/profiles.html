@@ -1,48 +1,54 @@
+
 <!DOCTYPE html>
 <html lang="he">
 <head>
     <meta charset="UTF-8">
     <title>Netflix Profiles</title>
     <link rel="stylesheet" href="profiles.css">
-
+ 
 </head>
 <body>
-
+ 
 <div class="container">
     <h1 class="title">Who's Watching?</h1>
-
+ 
     <div class="profiles" id="profiles-grid">
         <!-- filled by JS from server -->
     </div>
-
+ 
     <button class="manage-btn" onclick="openModal()">+ ADD PROFILE</button>
+    <!-- ── القسم 5: زر Sign Out ── -->
+    <button class="manage-btn" onclick="doLogout()"
+        style="margin-top:12px; background:transparent; border:1px solid #aaa; color:#aaa;">
+        Sign Out
+    </button>
 </div>
-
+ 
 <!-- Modal إضافة persona جديد -->
 <div id="modal-overlay" style="
     display:none; position:fixed; inset:0;
     background:rgba(0,0,0,0.75);
     justify-content:center; align-items:center; z-index:100;">
-
+ 
     <div style="
         background:#181818; border-radius:8px;
         padding:40px; width:360px; text-align:center;">
-
+ 
         <h2 style="margin-bottom:20px;">Add Profile</h2>
-
+ 
         <input type="text" id="new-name" placeholder="Profile name"
             style="width:100%;padding:12px;margin-bottom:14px;
                    background:#333;border:none;border-radius:4px;
                    color:white;font-size:15px;outline:none;">
-
+ 
         <input type="text" id="new-img" placeholder="Image URL (optional)"
             style="width:100%;padding:12px;margin-bottom:20px;
                    background:#333;border:none;border-radius:4px;
                    color:white;font-size:15px;outline:none;">
-
+ 
         <div id="modal-error"
             style="color:#e87c03;font-size:13px;margin-bottom:12px;min-height:18px;"></div>
-
+ 
         <div style="display:flex;gap:10px;">
             <button onclick="closeModal()" style="
                 flex:1;padding:12px;background:#333;color:#fff;
@@ -58,30 +64,42 @@
         </div>
     </div>
 </div>
-
+ 
 <script>
+// ── القسم 5: تحقق من الـ token ──
 const TOKEN = localStorage.getItem('token');
 if (!TOKEN) window.location.href = '/';
-
+ 
+// تحقق من السيرفر إن الـ session لسه صالح
+(async () => {
+    const res  = await fetch('/api/session-check', { headers: { 'x-auth-token': TOKEN } });
+    const data = await res.json();
+    if (!data.valid) {
+        localStorage.removeItem('token');
+        window.location.href = '/';
+    }
+})();
+ 
+// ── القسم 4: تحميل الـ personas من السيرفر ──
 async function loadProfiles() {
     const res = await fetch('/api/personas', {
         headers: { 'x-auth-token': TOKEN }
     });
-
+ 
     if (res.status === 401) {
         localStorage.removeItem('token');
         window.location.href = '/';
         return;
     }
-
+ 
     const personas = await res.json();
     renderProfiles(personas);
 }
-
+ 
 function renderProfiles(list) {
     const grid = document.getElementById('profiles-grid');
     grid.innerHTML = '';
-
+ 
     list.forEach(p => {
         const div = document.createElement('div');
         div.className = 'profile';
@@ -94,12 +112,12 @@ function renderProfiles(list) {
         grid.appendChild(div);
     });
 }
-
+ 
 function enterProfile(persona) {
     sessionStorage.setItem('persona', JSON.stringify(persona));
     window.location.href = '/feed.html';
 }
-
+ 
 function openModal() {
     document.getElementById('new-name').value  = '';
     document.getElementById('new-img').value   = '';
@@ -107,38 +125,50 @@ function openModal() {
     document.getElementById('modal-overlay').style.display = 'flex';
     document.getElementById('new-name').focus();
 }
-
+ 
 function closeModal() {
     document.getElementById('modal-overlay').style.display = 'none';
 }
-
+ 
+// ── القسم 4: حفظ الـ persona في السيرفر ──
 async function savePersona() {
     const name    = document.getElementById('new-name').value.trim();
     const img     = document.getElementById('new-img').value.trim();
     const errorEl = document.getElementById('modal-error');
-
+ 
     if (!name) { errorEl.textContent = 'Please enter a name'; return; }
-
+ 
     const res  = await fetch('/api/personas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-auth-token': TOKEN },
         body: JSON.stringify({ name, img })
     });
     const data = await res.json();
-
+ 
     if (data.success) { closeModal(); loadProfiles(); }
     else { errorEl.textContent = data.message; }
 }
-
+ 
+// ── القسم 5: Logout يمسح الـ session ──
+async function doLogout() {
+    await fetch('/logout', {
+        method: 'POST',
+        headers: { 'x-auth-token': TOKEN }
+    });
+    localStorage.removeItem('token');
+    sessionStorage.removeItem('persona');
+    window.location.href = '/';
+}
+ 
 // Close modal on overlay click
 document.getElementById('modal-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeModal();
 });
-
+ 
 document.getElementById('new-name').addEventListener('keydown', e => {
     if (e.key === 'Enter') savePersona();
 });
-
+ 
 loadProfiles();
 </script>
 </body>
