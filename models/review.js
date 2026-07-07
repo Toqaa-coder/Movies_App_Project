@@ -8,7 +8,7 @@ const reviewSchema = new mongoose.Schema({
     },
     contentId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Content', // בהנחה שיש מודל בשם Content
+        ref: 'Content', //Content
         required: true
     },
     rating: {
