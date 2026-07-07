@@ -2,6 +2,15 @@
 // feed.js — טעינת פוסטים מ־MongoDB והצגתם
 // ========================================
 
+// ============================================
+// בדיקת הרשאה - חובה לפני כל דבר אחר בדף
+// אם אין טוקן שמור - מפנה מיד ל-login ועוצר את טעינת הדף
+// (הפונקציה requireAuth מגיעה מ-authClient.js - יש לוודא שהוא נטען לפני feed.js)
+// ============================================
+if (!requireAuth()) {
+    throw new Error("המשתמש לא מחובר - מופנה ל-login");
+}
+
 let heroIndex = 0;  // אינדקס ה־Hero הנוכחי
 let heroItems = []; // רשימת פריטי ה־Hero
 let allPosts = [];  // כל הפוסטים מהשרת
@@ -18,8 +27,9 @@ document.addEventListener("DOMContentLoaded", () => {
 // ========================================
 async function loadPosts() {
     try {
-        // שליחת בקשת GET לשרת
-        const response = await fetch('/api/posts');
+        // שליחת בקשת GET לשרת - authFetch מצרפת את הטוקן אוטומטית
+        const response = await authFetch('/api/posts');
+        if (!response) return; // authFetch כבר הפנתה ל-login אם הטוקן לא תקין
         const posts = await response.json();
         allPosts = posts;
 
@@ -84,10 +94,11 @@ async function deletePost(postId) {
     if (!confirm("האם אתה בטוח שברצונך למחוק?")) return;
 
     try {
-        // שליחת בקשת DELETE לשרת עם ה־id של הפוסט
-        const response = await fetch(`/api/posts/${postId}`, {
+        // שליחת בקשת DELETE לשרת עם ה־id של הפוסט - authFetch מצרפת את הטוקן
+        const response = await authFetch(`/api/posts/${postId}`, {
             method: "DELETE"
         });
+        if (!response) return; // authFetch כבר הפנתה ל-login אם צריך
         const result = await response.json();
 
         if (result.message === "Deleted!") {
