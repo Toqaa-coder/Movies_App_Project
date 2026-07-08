@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const profileController = require('../controllers/profileController');
+const profileController = require('../controller/profileController');
 
 // חיפוש פרופילים לפי פרמטרים (חייב להיות לפני /:id כדי שלא יתבלבל עם מזהה)
 router.get('/search', profileController.searchProfiles);
