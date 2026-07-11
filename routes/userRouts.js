@@ -1,0 +1,17 @@
+const express = require('express');
+const router = express.Router();
+const userController = require('../controller/userController');
+const { verifyToken, isAdmin } = require('../middleware/authMiddleware');
+
+// הרשמה - פתוח לכולם (עוד אין למישהו טוקן בשלב הזה)
+router.post('/register', userController.register);
+
+// התחברות - פתוח לכולם
+router.post('/login', userController.login);
+
+// הצגת כל המשתמשים - רק למנהל (admin)
+router.get('/all', verifyToken, isAdmin, userController.getAllUsers);
+
+module.exports = router;
+
+

@@ -1,5 +1,14 @@
+// ============================================
+// בדיקת הרשאה - חובה לפני כל דבר אחר בדף
+// אם אין טוקן שמור - מפנה מיד ל-login ועוצר את טעינת הדף
+// ============================================
+if (!requireAuth()) {
+    throw new Error("המשתמש לא מחובר - מופנה ל-login");
+}
+
 let heroIndex = 0;
 let heroItems = [];
+let allPosts = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadFeed();
@@ -13,11 +22,9 @@ async function loadFeed() {
             authFetch('/api/feed/recommendations').then(r => r.json())
         ]);
 
-        // Hero - מהתכנים הפופולריים
         heroItems = popular;
         if (heroItems.length > 0) setHero(heroItems[0]);
 
-        // Continue Watching - כל רשומה מכילה content מקונן
         const continueItems = continueWatching.map(record => ({
             ...record.content,
             progress: record.progress
@@ -64,6 +71,29 @@ function filterMovies() {
         const title = post.querySelector('.overlay-title').textContent.toLowerCase();
         post.style.display = title.includes(term) ? '' : 'none';
     });
+}
+
+// ========================================
+// חלק ו׳ — מחיקת פוסט מ־MongoDB ומהמסך
+// ========================================
+async function deletePost(postId) {
+    if (!confirm("האם אתה בטוח שברצונך למחוק?")) return;
+
+    try {
+        const response = await authFetch(`/api/posts/${postId}`, {
+            method: "DELETE"
+        });
+        if (!response) return;
+        const result = await response.json();
+
+        if (result.message === "Deleted!") {
+            document.getElementById(`post-${postId}`).remove();
+        } else {
+            alert("שגיאה במחיקה");
+        }
+    } catch (error) {
+        alert("שגיאת רשת: " + error.message);
+    }
 }
 
 function setHero(item) {
