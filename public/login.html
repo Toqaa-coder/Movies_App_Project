@@ -98,6 +98,8 @@ async function doLogin() {
     const password = document.getElementById("password").value.trim();
     const errorEl = document.getElementById("error-msg");
 
+    errorEl.textContent = "";
+
     if (!username || !password) {
         errorEl.textContent = "נא למלא שם משתמש וסיסמא";
         return;
@@ -121,13 +123,10 @@ async function doLogin() {
             errorEl.textContent = data.message || "שם משתמש או סיסמא שגויים";
         }
     } catch (error) {
-        errorEl.textContent = "שגיאה בהתחברות לשרת";
+        console.error("Login error:", error);
+        errorEl.textContent = "שגיאת שרת, נסי שוב מאוחר יותר";
     }
 }
-
-document.addEventListener("keydown", e => {
-    if (e.key === "Enter") doLogin();
-});
 </script>
 
 </body>

@@ -1,12 +1,25 @@
 // ====================== profiles.js ======================
 
+// בדיקת הרשאה - חובה לפני טעינת הדף
+if (!requireAuth()) {
+    throw new Error("המשתמש לא מחובר - מופנה ל-login");
+}
+
 // טעינת פרופילים מהשרת
 async function loadProfiles() {
     try {
-        const response = await fetch('/profiles');
+        console.log('TOKEN BEFORE FETCH:', localStorage.getItem('token'));
+
+        const response = await authFetch('/api/profiles');
+        console.log('RESPONSE STATUS:', response ? response.status : 'response is null');
+
+        if (!response) return; // authFetch כבר הפנתה ל-login אם הטוקן לא תקין
+
         const data = await response.json();
+        console.log('DATA RECEIVED:', data);
 
         if (!data.success) {
+            console.log('REDIRECTING BECAUSE success=false');
             window.location.href = '/';
             return;
         }
@@ -56,20 +69,19 @@ async function addNewProfile() {
     }
 
     try {
-        const response = await fetch('/profiles', {
+        const response = await authFetch('/api/profiles', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ profileName: profileName })
         });
+        if (!response) return;
 
         const data = await response.json();
 
         if (data.success) {
-            // סגירת המודל
             const modal = bootstrap.Modal.getInstance(document.getElementById('addProfileModal'));
             modal.hide();
             input.value = '';
-            loadProfiles(); // רענון הרשימה
+            loadProfiles();
         } else {
             alert(data.message || "שגיאה בהוספת פרופיל");
         }
@@ -85,8 +97,15 @@ function showAddProfileModal() {
 }
 
 // טעינה כשהעמוד נטען
-document.addEventListener('DOMContentLoaded', loadProfiles); 
+document.addEventListener('DOMContentLoaded', loadProfiles);
+
 async function logout() {
-    await fetch('/logout', { method: 'POST' });
-    window.location.href = '/';
+    // logout מבוצע דרך authClient.js (מוחק את הטוקן מקומית)
+    if (typeof window.logout === 'function' && window.logout !== logout) {
+        window.logout();
+    } else {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        window.location.href = '/';
+    }
 }
