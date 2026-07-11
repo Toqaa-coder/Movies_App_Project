@@ -9,8 +9,10 @@ app.use(express.static('public'));
 connectDB();
 
 app.use('/api/posts', require('./routes/postRoutes'));
-app.use('/api/profiles', require('./routes/profileroutes'));
+app.use('/api/feed', require('./routes/feedRoutes'));
+app.use('/api/profiles', require('./routes/profilerouter'));
 app.use('/api/reviews', require('./routes/reviewRoutes'));
+app.use('/api/users', require('./routes/userRouts'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
