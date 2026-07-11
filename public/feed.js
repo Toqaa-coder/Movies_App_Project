@@ -8,22 +8,22 @@ if (!requireAuth()) {
 
 let heroIndex = 0;
 let heroItems = [];
-let allPosts = [];
 
 document.addEventListener("DOMContentLoaded", async () => {
     await loadFeed();
+    setInterval(nextHero, 5000);
 });
 
 async function loadFeed() {
     try {
-        const [popular, continueWatching, recommendations] = await Promise.all([
+        const [popular, realityShows, continueWatching] = await Promise.all([
             authFetch('/api/feed/popular').then(r => r.json()),
-            authFetch('/api/feed/continue-watching').then(r => r.json()),
-            authFetch('/api/feed/recommendations').then(r => r.json())
+            authFetch('/api/feed/category?category=Reality').then(r => r.json()),
+            authFetch('/api/watchhistory').then(r => r.json())
         ]);
 
         heroItems = popular;
-        if (heroItems.length > 0) setHero(heroItems[0]);
+        if (heroItems.length > 0) { setHero(heroItems[0]); renderDots(); }
 
         const continueItems = continueWatching.map(record => ({
             ...record.content,
@@ -31,7 +31,7 @@ async function loadFeed() {
         }));
 
         renderRow("row-trending", popular);
-        renderRow("row-reality", recommendations);
+        renderRow("row-reality", realityShows);
         renderRow("row-continue", continueItems);
 
     } catch (error) {
@@ -53,13 +53,20 @@ function renderRow(containerId, items) {
         let progressBar = item.progress
             ? `<div class="progress-bar"><div class="progress" style="width:${item.progress}%"></div></div>`
             : "";
+
         container.innerHTML += `
             <div class="post">
                 <img class="post-thumb" src="${item.img || item.videoUrl || ''}" alt="${item.title}">
                 ${progressBar}
                 <div class="post-overlay">
                     <div class="overlay-title">${item.title}</div>
-                    <div class="overlay-meta"><span>${item.year || ''}</span> • <span>${item.category || ''}</span></div>
+                    <div class="overlay-meta">
+                        <span>${item.year || ''}</span> • <span>${item.category || ''}</span>
+                    </div>
+                    <div class="overlay-actions">
+                        <button class="like-btn" onclick="addLike('${item._id}', this)">♥️</button>
+                        <span class="like-count" id="likes-${item._id}">${item.likes || 0}</span>
+                    </div>
                 </div>
             </div>`;
     });
@@ -73,33 +80,11 @@ function filterMovies() {
     });
 }
 
-// ========================================
-// חלק ו׳ — מחיקת פוסט מ־MongoDB ומהמסך
-// ========================================
-async function deletePost(postId) {
-    if (!confirm("האם אתה בטוח שברצונך למחוק?")) return;
-
-    try {
-        const response = await authFetch(`/api/posts/${postId}`, {
-            method: "DELETE"
-        });
-        if (!response) return;
-        const result = await response.json();
-
-        if (result.message === "Deleted!") {
-            document.getElementById(`post-${postId}`).remove();
-        } else {
-            alert("שגיאה במחיקה");
-        }
-    } catch (error) {
-        alert("שגיאת רשת: " + error.message);
-    }
-}
-
 function setHero(item) {
     document.getElementById("hero").style.backgroundImage = `url(${item.img || item.videoUrl || ''})`;
     document.getElementById("hero-title").textContent = item.title;
     document.getElementById("hero-meta").innerHTML = `<span>${item.year || ''}</span> | <span>${item.category || ''}</span>`;
+    updateDots();
 }
 
 function nextHero() {
@@ -114,7 +99,48 @@ function prevHero() {
     setHero(heroItems[heroIndex]);
 }
 
+function goToHero(index) {
+    heroIndex = index;
+    setHero(heroItems[heroIndex]);
+}
+
 function scrollRow(id, amount) {
     document.getElementById(id).scrollBy({ left: amount, behavior: 'smooth' });
 }
 
+function renderDots() {
+    const dots = document.getElementById("hero-dots");
+    if (!dots) return;
+    dots.innerHTML = "";
+    heroItems.forEach((_, index) => {
+        dots.innerHTML += `<div class="dot" onclick="goToHero(${index})"></div>`;
+    });
+    updateDots();
+}
+
+function updateDots() {
+    document.querySelectorAll(".dot").forEach((dot, index) => {
+        dot.classList.toggle("active", index === heroIndex);
+    });
+}
+
+async function addLike(id, button) {
+    try {
+        const response = await authFetch(`/api/content/${id}/like`, { method: 'PUT' });
+        if (!response) return;
+        const updated = await response.json();
+
+        document.getElementById(`likes-${id}`).innerText = updated.likes;
+
+        button.classList.add("animate-heart");
+        setTimeout(() => button.classList.remove("animate-heart"), 300);
+    } catch (error) {
+        console.error('שגיאה בעדכון לייק', error);
+    }
+}
+
+// חשיפת פונקציות שנקראות מה-HTML (onclick) לחלון הגלובלי
+window.nextHero = nextHero;
+window.prevHero = prevHero;
+window.goToHero = goToHero;
+window.addLike = addLike;

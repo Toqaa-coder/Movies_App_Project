@@ -10,7 +10,7 @@ router.post('/', verifyToken, isAdmin, contentController.createContent);
 router.get('/:id', verifyToken, contentController.getContentById);
 router.put('/:id', verifyToken, isAdmin, contentController.updateContent);
 router.delete('/:id', verifyToken, isAdmin, contentController.deleteContent);
-
+router.put('/:id/like', verifyToken, contentController.likeContent);
 module.exports = router;
 
 

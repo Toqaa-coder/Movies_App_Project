@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { verifyToken } = require('../middleware/authMiddleware');
 const {
   createWatchHistory,
   getAllWatchHistory,
@@ -8,10 +9,10 @@ const {
   deleteWatchHistory
 } = require('../controller/watchHistoryController');
 
-router.post('/', createWatchHistory);
-router.get('/', getAllWatchHistory);
-router.get('/search', searchWatchHistory);
-router.put('/:id', updateWatchHistory);
-router.delete('/:id', deleteWatchHistory);
+router.post('/', verifyToken, createWatchHistory);
+router.get('/', verifyToken, getAllWatchHistory);
+router.get('/search', verifyToken, searchWatchHistory);
+router.put('/:id', verifyToken, updateWatchHistory);
+router.delete('/:id', verifyToken, deleteWatchHistory);
 
 module.exports = router;

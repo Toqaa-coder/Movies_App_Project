@@ -6,11 +6,11 @@ const watchHistorySchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
-  content: {
+content: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Post', 
+    ref: 'Content', 
     required: true
-  },
+},
   watchedAt: {
     type: Date,
     default: Date.now
