@@ -1,6 +1,5 @@
 const Content = require('../models/contentModel');
 
-// CREATE - יצירת תוכן חדש
 exports.createContent = async (req, res) => {
   try {
     const newContent = new Content(req.body);
@@ -11,7 +10,6 @@ exports.createContent = async (req, res) => {
   }
 };
 
-// READ - הצגת כל התכנים (List)
 exports.getAllContent = async (req, res) => {
   try {
     const contents = await Content.find();
@@ -21,7 +19,6 @@ exports.getAllContent = async (req, res) => {
   }
 };
 
-// READ - הצגת תוכן בודד לפי ID
 exports.getContentById = async (req, res) => {
   try {
     const content = await Content.findById(req.params.id);
@@ -34,7 +31,6 @@ exports.getContentById = async (req, res) => {
   }
 };
 
-// UPDATE - עדכון תוכן קיים
 exports.updateContent = async (req, res) => {
   try {
     const updatedContent = await Content.findByIdAndUpdate(
@@ -51,7 +47,6 @@ exports.updateContent = async (req, res) => {
   }
 };
 
-// DELETE - מחיקת תוכן
 exports.deleteContent = async (req, res) => {
   try {
     const deletedContent = await Content.findByIdAndDelete(req.params.id);
@@ -64,18 +59,15 @@ exports.deleteContent = async (req, res) => {
   }
 };
 
-// SEARCH - חיפוש מתקדם (לפי קטגוריה, שנה, דירוג מינימלי - לפחות 3 פרמטרים כנדרש בסעיף 10)
 exports.searchContent = async (req, res) => {
   try {
     const { category, year, minRating, type, title } = req.query;
     const filter = {};
-
     if (category) filter.category = category;
     if (year) filter.year = Number(year);
     if (minRating) filter.rating = { $gte: Number(minRating) };
     if (type) filter.type = type;
     if (title) filter.title = { $regex: title, $options: 'i' };
-
     const results = await Content.find(filter);
     res.status(200).json(results);
   } catch (err) {
@@ -83,7 +75,6 @@ exports.searchContent = async (req, res) => {
   }
 };
 
-// GroupBy - התכנים הנצפים ביותר לפי קטגוריה (דוגמה לסעיף 10)
 exports.getPopularByCategory = async (req, res) => {
   try {
     const result = await Content.aggregate([

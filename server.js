@@ -9,7 +9,7 @@ app.use(express.static('public'));
 connectDB();
 
 app.use('/api/posts', require('./routes/postRoutes'));
-app.use('/api/profiles', require('./routes/profilerouter'));
+app.use('/api/profiles', require('./routes/profileRouters'));
 app.use('/api/content', require('./routes/contentRouts'));
 app.use('/api/users', require('./routes/userRouts'));
 

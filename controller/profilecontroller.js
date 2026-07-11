@@ -1,4 +1,4 @@
-const Profile = require('../models/Profile');
+const Profile = require('../models/profileModel');
 
 // Create - יצירת פרופיל חדש
 exports.createProfile = async (req, res) => {
