@@ -1,4 +1,4 @@
-const Review = require('../models/review');
+const Review = require('../models/reviewModel');
 
 // Create - יצירת ביקורת/דירוג חדש
 exports.createReview = async (req, res) => {

@@ -5,7 +5,9 @@ require('dotenv').config();
 const app = express();
 app.use(express.json());
 app.use(express.static('public'));
-
+app.get('/', (req, res) => {
+    res.redirect('/login.html');
+});
 connectDB();
 
 app.use('/api/posts', require('./routes/postRoutes'));
