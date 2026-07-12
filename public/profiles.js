@@ -56,25 +56,22 @@ async function addNewProfile() {
     }
 
     try {
-        const response = await fetch('/profiles', {
+        const user = getCurrentUser();
+        const response = await authFetch('/api/profiles', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ profileName: profileName })
+            body: JSON.stringify({ userId: user.id, profileName, age: 18, preferences: [] })
         });
-
+        if (!response) return;
         const data = await response.json();
 
-        if (data.success) {
-            // סגירת המודל
-            const modal = bootstrap.Modal.getInstance(document.getElementById('addProfileModal'));
-            modal.hide();
-            input.value = '';
-            loadProfiles(); // רענון הרשימה
+        if (data._id) {
+            localStorage.setItem('selectedProfileId', data._id);
+            window.location.href = '/feed.html';
         } else {
             alert(data.message || "שגיאה בהוספת פרופיל");
         }
     } catch (error) {
-        alert("שגיאה בשרת");
+        alert("שגיאה בשרת: " + error.message);
     }
 }
 
