@@ -7,7 +7,9 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            background: #141414;
+            /* TODO: להחליף לתמונה שלך - שמי אותה בתיקיית public/images/ */
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)),
+                        url('images/background.jpg') center/cover no-repeat;
             color: white;
             font-family: Arial, sans-serif;
             display: flex;
@@ -16,19 +18,20 @@
             min-height: 100vh;
         }
 
-        .login-box {
-            background: rgba(0,0,0,0.75);
-            border-radius: 8px;
-            padding: 60px 68px;
-            width: 400px;
-        }
-
-        .logo {
+        .top-logo {
+            position: absolute;
+            top: 24px;
+            right: 40px;
             color: #e50914;
             font-size: 32px;
             font-weight: 900;
-            text-align: center;
-            margin-bottom: 30px;
+        }
+
+        .login-box {
+            background: rgba(0,0,0,0.75);
+            border-radius: 4px;
+            padding: 60px 68px;
+            width: 400px;
         }
 
         h2 {
@@ -66,6 +69,39 @@
 
         button:hover { background: #c40812; }
 
+        .secondary-btn {
+            background: rgba(255,255,255,0.15);
+        }
+        .secondary-btn:hover { background: rgba(255,255,255,0.25); }
+
+        .divider {
+            text-align: center;
+            color: #737373;
+            margin: 16px 0;
+            font-size: 13px;
+        }
+
+        .remember-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 16px;
+            font-size: 13px;
+            color: #b3b3b3;
+        }
+
+        .remember-row label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        a.link {
+            color: #b3b3b3;
+            text-decoration: none;
+        }
+        a.link:hover { text-decoration: underline; }
+
         #error-msg {
             color: #e87c03;
             font-size: 13px;
@@ -73,35 +109,82 @@
             text-align: center;
             min-height: 20px;
         }
+
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
+<div class="top-logo">NETFLIX</div>
+
 <div class="login-box">
-    <div class="logo">NETFLIX</div>
-    <h2>התחברות</h2>
 
-    <input type="text"     id="username" placeholder="שם משתמש (אימייל)">
-    <input type="password" id="password" placeholder="סיסמא">
+    <!-- ==== מצב 1: כניסה עם סיסמה (ברירת מחדל) ==== -->
+    <div id="password-mode">
+        <h2>כניסה לחשבון</h2>
 
-    <button onclick="doLogin()">כניסה</button>
+        <input type="text" id="username" placeholder="אימייל">
+        <input type="password" id="password" placeholder="סיסמה">
+
+        <button onclick="doLogin()">כניסה לחשבון</button>
+
+        <div class="divider">או</div>
+
+        <button class="secondary-btn" onclick="switchToCodeMode()">כניסה עם קוד</button>
+
+        <div class="remember-row">
+            <label><input type="checkbox" id="rememberMe" style="width:auto;margin:0;"> זכרו אותי</label>
+            <a href="forgetPassword.html" class="link">שכחת את הסיסמה?</a>
+        </div>
+    </div>
+
+    <!-- ==== מצב 2: בקשת קוד כניסה ==== -->
+    <div id="code-request-mode" class="hidden">
+        <h2>כניסה עם קוד</h2>
+        <input type="text" id="codeEmail" placeholder="אימייל">
+        <button onclick="requestLoginCode()">שלחו לי קוד</button>
+        <div class="remember-row">
+            <a href="#" class="link" onclick="switchToPasswordMode()">חזרה לכניסה עם סיסמה</a>
+        </div>
+    </div>
+
+    <!-- ==== מצב 3: הזנת קוד שהתקבל ==== -->
+    <div id="code-verify-mode" class="hidden">
+        <h2>הזיני את הקוד</h2>
+        <p style="color:#b3b3b3;font-size:13px;margin-bottom:14px;">שלחנו קוד למייל שלך, תקף ל-10 דקות</p>
+        <input type="text" id="loginCode" placeholder="קוד בן 6 ספרות">
+        <button onclick="doLoginWithCode()">כניסה</button>
+    </div>
 
     <div id="error-msg"></div>
 </div>
 
-<!-- authClient.js חייב להיטען לפני ה-script הזה, כדי ש-saveAuth תהיה מוכרת -->
 <script src="authClient.js"></script>
-
 <script>
+let emailForCode = '';
+
+// --- מעבר בין המצבים ---
+function switchToCodeMode() {
+    document.getElementById('password-mode').classList.add('hidden');
+    document.getElementById('code-request-mode').classList.remove('hidden');
+    document.getElementById('error-msg').textContent = '';
+}
+
+function switchToPasswordMode() {
+    document.getElementById('code-request-mode').classList.add('hidden');
+    document.getElementById('code-verify-mode').classList.add('hidden');
+    document.getElementById('password-mode').classList.remove('hidden');
+    document.getElementById('error-msg').textContent = '';
+}
+
+// --- כניסה רגילה עם סיסמה ---
 async function doLogin() {
     const username = document.getElementById("username").value.trim();
     const password = document.getElementById("password").value.trim();
     const errorEl = document.getElementById("error-msg");
 
-    errorEl.textContent = "";
-
     if (!username || !password) {
-        errorEl.textContent = "נא למלא שם משתמש וסיסמא";
+        errorEl.textContent = "נא למלא אימייל וסיסמה";
         return;
     }
 
@@ -109,26 +192,92 @@ async function doLogin() {
         const response = await fetch("/api/users/login", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            // השרת מצפה לשדה email, לכן שולחים את מה שהוקלד תחת המפתח email
             body: JSON.stringify({ email: username, password })
         });
 
         const data = await response.json();
 
         if (response.ok && data.token) {
-            // שמירת הטוקן ופרטי המשתמש בעזרת authClient.js
             saveAuth(data.token, data.user);
-            window.location.href = "/profiles.html";
+            window.location.href = "profiles.html";
         } else {
-            errorEl.textContent = data.message || "שם משתמש או סיסמא שגויים";
+            errorEl.textContent = data.message || "אימייל או סיסמה שגויים";
         }
     } catch (error) {
-        console.error("Login error:", error);
-        errorEl.textContent = "שגיאת שרת, נסי שוב מאוחר יותר";
+        errorEl.textContent = "שגיאה בהתחברות לשרת";
     }
 }
+
+// --- בקשת קוד כניסה ---
+async function requestLoginCode() {
+    const email = document.getElementById("codeEmail").value.trim();
+    const errorEl = document.getElementById("error-msg");
+
+    if (!email) {
+        errorEl.textContent = "נא למלא אימייל";
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/users/send-code", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+            emailForCode = email;
+            document.getElementById('code-request-mode').classList.add('hidden');
+            document.getElementById('code-verify-mode').classList.remove('hidden');
+            errorEl.textContent = '';
+        } else {
+            errorEl.textContent = data.message || "שגיאה בשליחת קוד";
+        }
+    } catch (error) {
+        errorEl.textContent = "שגיאה בהתחברות לשרת";
+    }
+}
+
+// --- כניסה עם קוד ---
+async function doLoginWithCode() {
+    const code = document.getElementById("loginCode").value.trim();
+    const errorEl = document.getElementById("error-msg");
+
+    if (!code) {
+        errorEl.textContent = "נא למלא קוד";
+        return;
+    }
+
+    try {
+        const response = await fetch("/api/users/login-with-code", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ email: emailForCode, code })
+        });
+        const data = await response.json();
+
+        if (response.ok && data.token) {
+            saveAuth(data.token, data.user);
+            window.location.href = "profiles.html";
+        } else {
+            errorEl.textContent = data.message || "קוד שגוי או פג תוקף";
+        }
+    } catch (error) {
+        errorEl.textContent = "שגיאה בהתחברות לשרת";
+    }
+}
+
+document.addEventListener("keydown", e => {
+    if (e.key === "Enter") {
+        if (!document.getElementById('password-mode').classList.contains('hidden')) doLogin();
+        else if (!document.getElementById('code-request-mode').classList.contains('hidden')) requestLoginCode();
+        else if (!document.getElementById('code-verify-mode').classList.contains('hidden')) doLoginWithCode();
+    }
+});
 </script>
 
 </body>
 </html>
+
 

@@ -21,9 +21,19 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['user', 'admin'],
         default: 'user'
+    },
+    // --- שדות חדשים: לצורך "שכחתי סיסמה" ו"כניסה עם קוד" ---
+    resetCode: {
+        type: String,
+        default: null
+    },
+    resetCodeExpires: {
+        type: Date,
+        default: null
     }
 }, {
     timestamps: true
 });
 
 module.exports = mongoose.model('User', userSchema);
+
