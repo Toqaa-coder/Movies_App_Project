@@ -17,6 +17,7 @@ app.use('/api/reviews', require('./routes/reviewRoutes'));
 app.use('/api/content', require('./routes/contentRouts'));
 app.use('/api/users', require('./routes/userRouts'));
 app.use('/api/watchhistory', require('./routes/watchHistoryRoutes'));
+app.use('/api/omdb', require('./routes/omdbRoutes'));
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
