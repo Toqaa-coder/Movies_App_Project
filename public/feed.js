@@ -80,6 +80,34 @@ function filterMovies() {
     });
 }
 
+// ============================================
+// חיפוש לפי קטגוריה - סוג חיפוש שני כנדרש בסעיף 10
+// ============================================
+async function searchByCategory() {
+    const category = document.getElementById("categorySelect").value;
+    const resultsSection = document.getElementById("category-results-section");
+
+    if (!category) {
+        resultsSection.style.display = "none";
+        return;
+    }
+
+    try {
+        const response = await authFetch(`/api/content/search?category=${encodeURIComponent(category)}`);
+        if (!response) return;
+
+        const results = await response.json();
+
+        resultsSection.style.display = "block";
+        renderRow("row-category", results);
+
+        resultsSection.scrollIntoView({ behavior: "smooth" });
+
+    } catch (error) {
+        console.error('שגיאה בחיפוש לפי קטגוריה', error);
+    }
+}
+
 function setHero(item) {
     document.getElementById("hero").style.backgroundImage = `url(${item.img || item.videoUrl || ''})`;
     document.getElementById("hero-title").textContent = item.title;
@@ -144,3 +172,4 @@ window.nextHero = nextHero;
 window.prevHero = prevHero;
 window.goToHero = goToHero;
 window.addLike = addLike;
+window.searchByCategory = searchByCategory;

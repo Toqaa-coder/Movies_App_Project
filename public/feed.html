@@ -30,6 +30,17 @@
                 </div>
                 <button class="nav-search-icon">🔍</button>
             </div>
+
+            <!-- חיפוש חדש לפי קטגוריה -->
+            <select id="categorySelect" class="alpha-btn" onchange="searchByCategory()">
+                <option value="">All Categories</option>
+                <option value="Action">Action</option>
+                <option value="Comedy">Comedy</option>
+                <option value="Drama">Drama</option>
+                <option value="Sci-Fi">Sci-Fi</option>
+                <option value="Reality">Reality</option>
+            </select>
+
             <button class="alpha-btn" onclick="sortAlphabetically()">A-Z</button>
             <div class="nav-avatar">A</div>
         </div>
@@ -40,13 +51,22 @@
             <h1 id="hero-title" class="hero-title"></h1>
             <div id="hero-meta" class="hero-meta"></div>
             <div class="hero-buttons">
-                <button class="btn-play">▶ Play</button>
+                <button class="btn-play">▶️ Play</button>
                 <button class="btn-info">ⓘ More Info</button>
             </div>
         </div>
         <button class="hero-arrow left" onclick="prevHero()">‹</button>
         <button class="hero-arrow right" onclick="nextHero()">›</button>
         <div id="hero-dots" class="hero-dots"></div>
+    </div>
+
+    <div class="feed-section" id="category-results-section" style="display: none;">
+        <h2 class="section-title">Category Results</h2>
+        <div class="row-wrapper">
+            <button class="scroll-btn left" onclick="scrollRow('row-category', -300)">‹</button>
+            <div id="row-category" class="row-row"></div>
+            <button class="scroll-btn right" onclick="scrollRow('row-category', 300)">›</button>
+        </div>
     </div>
 
     <div class="feed-section">
@@ -77,7 +97,7 @@
     </div>
 
     <script src="authClient.js"></script>
-<script src="feed.js"></script>
+    <script src="feed.js"></script>
 </body>
 </html>
 
