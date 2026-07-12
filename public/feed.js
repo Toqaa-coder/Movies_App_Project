@@ -72,12 +72,56 @@ function renderRow(containerId, items) {
     });
 }
 
-function filterMovies() {
-    const term = document.getElementById("searchInput").value.toLowerCase();
-    document.querySelectorAll('.post').forEach(post => {
+async function filterMovies() {
+    const term = document.getElementById("searchInput").value.trim();
+    const termLower = term.toLowerCase();
+    const posts = document.querySelectorAll('.post');
+    let foundLocal = false;
+
+    posts.forEach(post => {
         const title = post.querySelector('.overlay-title').textContent.toLowerCase();
-        post.style.display = title.includes(term) ? '' : 'none';
+        const match = title.includes(termLower);
+        post.style.display = match ? '' : 'none';
+        if (match) foundLocal = true;
     });
+
+    const resultsSection = document.getElementById("category-results-section");
+
+    if (!term) {
+        if (resultsSection) resultsSection.style.display = "none";
+        return;
+    }
+
+    if (foundLocal) {
+        if (resultsSection) resultsSection.style.display = "none";
+        return;
+    }
+
+    // אין תוצאות מקומיות - נבדוק מול OMDb
+    try {
+        const res = await authFetch(`/api/omdb?title=${encodeURIComponent(term)}`);
+        const data = await res.json();
+
+        if (!resultsSection) return;
+
+        if (data.Response === "False" || !data.Title) {
+            resultsSection.innerHTML = `<p style="color:#777; padding:10px;">לא נמצאו תוצאות עבור "${term}"</p>`;
+        } else {
+            resultsSection.innerHTML = `
+                <div class="post">
+                    <img class="post-thumb" src="${data.Poster !== "N/A" ? data.Poster : ''}" alt="${data.Title}">
+                    <div class="post-overlay">
+                        <div class="overlay-title">${data.Title}</div>
+                        <div class="overlay-meta">
+                            <span>${data.Year || ''}</span> • <span>${data.Genre || ''}</span>
+                        </div>
+                    </div>
+                </div>`;
+        }
+        resultsSection.style.display = "block";
+    } catch (error) {
+        console.error('שגיאה בחיפוש ב-OMDb', error);
+    }
 }
 
 function setHero(item) {
@@ -124,23 +168,3 @@ function updateDots() {
     });
 }
 
-async function addLike(id, button) {
-    try {
-        const response = await authFetch(`/api/content/${id}/like`, { method: 'PUT' });
-        if (!response) return;
-        const updated = await response.json();
-
-        document.getElementById(`likes-${id}`).innerText = updated.likes;
-
-        button.classList.add("animate-heart");
-        setTimeout(() => button.classList.remove("animate-heart"), 300);
-    } catch (error) {
-        console.error('שגיאה בעדכון לייק', error);
-    }
-}
-
-// חשיפת פונקציות שנקראות מה-HTML (onclick) לחלון הגלובלי
-window.nextHero = nextHero;
-window.prevHero = prevHero;
-window.goToHero = goToHero;
-window.addLike = addLike;

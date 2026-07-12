@@ -17,3 +17,5 @@ exports.getMovieInfo = async (req, res) => {
         res.status(500).json({ message: 'שגיאה בפנייה ל-OMDb API', error: error.message });
     }
 };
+
+

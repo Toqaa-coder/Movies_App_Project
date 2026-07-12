@@ -6,3 +6,4 @@ const { verifyToken } = require('../middleware/authMiddleware');
 router.get('/', verifyToken, getMovieInfo);
 
 module.exports = router;
+

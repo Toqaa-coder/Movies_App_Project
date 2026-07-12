@@ -12,6 +12,7 @@ app.use('/api/posts', require('./routes/postRoutes'));
 app.use('/api/profiles', require('./routes/profileRouters'));
 app.use('/api/content', require('./routes/contentRouts'));
 app.use('/api/users', require('./routes/userRouts'));
+app.use('/api/omdb', require('./routes/omdbRoutes'));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
