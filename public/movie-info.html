@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <title>Movie Info</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background: #141414; color: white; font-family: Arial; margin: 0; }
+        #navbar { background: #141414; padding: 15px 20px; border-bottom: 1px solid #333; }
+        .netflix-logo { color: #e50914; font-size: 24px; font-weight: 900; text-decoration: none; }
+        .search-section { padding: 30px; }
+        h2 { color: #e50914; }
+        input { background: #333 !important; color: white !important; border: 1px solid #555 !important; }
+        input::placeholder { color: #aaa; }
+        .movie-result { background: #222; border-radius: 10px; padding: 20px; margin-top: 20px; display: none; }
+        .movie-result img { border-radius: 8px; width: 150px; }
+        .movie-title { font-size: 24px; font-weight: bold; color: #e50914; }
+        .badge-info { background: #333; padding: 4px 10px; border-radius: 10px; font-size: 12px; margin-right: 5px; }
+        .rating { color: #f5c518; font-size: 20px; font-weight: bold; }
+        #error-msg { color: #e87c03; margin-top: 10px; display: none; }
+        #loading { color: #aaa; margin-top: 10px; display: none; }
+    </style>
+</head>
+<body>
+    <div id="navbar">
+        <a href="feed.html" class="netflix-logo">NETFLIX</a>
+        <span style="color:white; margin-left:20px;">🎬 Movie Info (OMDb API)</span>
+    </div>
+
+    <div class="search-section">
+        <h2>Search Movie Info</h2>
+        <p style="color:#aaa;">Search for any movie to get details from OMDb external API</p>
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="input-group">
+                    <input type="text" id="movieSearch" class="form-control" placeholder="Enter movie name...">
+                    <button class="btn btn-danger" onclick="searchMovie()">Search</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="loading">⏳ Loading...</div>
+        <div id="error-msg">❌ Movie not found!</div>
+
+        <div class="movie-result" id="movie-result">
+            <div class="row">
+                <div class="col-md-2">
+                    <img id="movie-poster" src="" alt="poster">
+                </div>
+                <div class="col-md-10">
+                    <div class="movie-title" id="movie-title"></div>
+                    <div class="mt-2">
+                        <span class="badge-info" id="movie-year"></span>
+                        <span class="badge-info" id="movie-genre"></span>
+                        <span class="badge-info" id="movie-runtime"></span>
+                    </div>
+                    <div class="rating mt-2">⭐ <span id="movie-rating"></span>/10</div>
+                    <p class="mt-3" id="movie-plot" style="color:#ccc;"></p>
+                    <div style="color:#aaa; font-size:13px;">
+                        <strong style="color:white;">Director:</strong> <span id="movie-director"></span>
+                    </div>
+                    <div style="color:#aaa; font-size:13px; margin-top:5px;">
+                        <strong style="color:white;">Actors:</strong> <span id="movie-actors"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    async function searchMovie() {
+        const title = document.getElementById('movieSearch').value.trim();
+        if (!title) return;
+
+        document.getElementById('loading').style.display = 'block';
+        document.getElementById('error-msg').style.display = 'none';
+        document.getElementById('movie-result').style.display = 'none';
+
+        try {
+            const res = await fetch(`/api/omdb?title=${encodeURIComponent(title)}`);
+            const data = await res.json();
+
+            document.getElementById('loading').style.display = 'none';
+
+            if (data.Response === 'False') {
+                document.getElementById('error-msg').style.display = 'block';
+                return;
+            }
+
+            document.getElementById('movie-poster').src = data.Poster !== 'N/A' ? data.Poster : 'https://via.placeholder.com/150x220?text=No+Image';
+            document.getElementById('movie-title').textContent = data.Title;
+            document.getElementById('movie-year').textContent = data.Year;
+            document.getElementById('movie-genre').textContent = data.Genre;
+            document.getElementById('movie-runtime').textContent = data.Runtime;
+            document.getElementById('movie-rating').textContent = data.imdbRating;
+            document.getElementById('movie-plot').textContent = data.Plot;
+            document.getElementById('movie-director').textContent = data.Director;
+            document.getElementById('movie-actors').textContent = data.Actors;
+
+            document.getElementById('movie-result').style.display = 'block';
+        } catch (err) {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('error-msg').style.display = 'block';
+        }
+    }
+
+    document.getElementById('movieSearch').addEventListener('keydown', e => {
+        if (e.key === 'Enter') searchMovie();
+    });
+    </script>
+</body>
+</html>
