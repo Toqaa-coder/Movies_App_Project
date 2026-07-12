@@ -2,12 +2,13 @@ const mongoose = require('mongoose');
 
 const postSchema = new mongoose.Schema({
   title: String,
-  body: String,
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
-});
+  year: String,
+  genre: String,
+  type: String,
+  img: String,
+  row: String,
+  progress: Number,
+  description: String,
+}, { timestamps: true });
 
 module.exports = mongoose.model('Post', postSchema);
-

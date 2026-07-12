@@ -1,0 +1,17 @@
+const express = require('express');
+const router = express.Router();
+const {
+  createWatchHistory,
+  getAllWatchHistory,
+  searchWatchHistory,
+  updateWatchHistory,
+  deleteWatchHistory
+} = require('../controller/watchHistoryController');
+
+router.post('/', createWatchHistory);
+router.get('/', getAllWatchHistory);
+router.get('/search', searchWatchHistory);
+router.put('/:id', updateWatchHistory);
+router.delete('/:id', deleteWatchHistory);
+
+module.exports = router;
