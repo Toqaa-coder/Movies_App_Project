@@ -16,3 +16,4 @@ router.put('/:id', verifyToken, updateWatchHistory);
 router.delete('/:id', verifyToken, deleteWatchHistory);
 
 module.exports = router;
+

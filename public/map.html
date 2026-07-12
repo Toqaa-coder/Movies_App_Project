@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Movies Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <style>
+        body { margin: 0; background: #141414; font-family: Arial; }
+        #navbar { background: #141414; padding: 15px 20px; }
+        .netflix-logo { color: #e50914; font-size: 24px; font-weight: 900; text-decoration: none; }
+        #map { height: calc(100vh - 60px); }
+    </style>
+</head>
+<body>
+    <div id="navbar">
+        <a href="feed.html" class="netflix-logo">NETFLIX</a>
+        <span style="color:white; margin-left:20px;">🗺️ Movies Around the World</span>
+    </div>
+    <div id="map"></div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        const map = L.map('map').setView([20, 0], 2);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
+
+        const locations = [
+            { title: "Breaking Bad", lat: 35.0853, lng: -106.6056, city: "Albuquerque, USA", genre: "Crime" },
+            { title: "Squid Game", lat: 37.5665, lng: 126.9780, city: "Seoul, South Korea", genre: "Thriller" },
+            { title: "Money Heist", lat: 40.4168, lng: -3.7038, city: "Madrid, Spain", genre: "Crime" },
+            { title: "The Crown", lat: 51.5074, lng: -0.1278, city: "London, UK", genre: "Drama" },
+            { title: "Lupin", lat: 48.8566, lng: 2.3522, city: "Paris, France", genre: "Thriller" },
+            { title: "Dark", lat: 52.5200, lng: 13.4050, city: "Berlin, Germany", genre: "Sci-Fi" },
+            { title: "Narcos", lat: 6.2442, lng: -75.5812, city: "Medellin, Colombia", genre: "Crime" },
+            { title: "Bridgerton", lat: 51.5074, lng: -0.1278, city: "London, UK", genre: "Romance" },
+            { title: "Stranger Things", lat: 33.7490, lng: -84.3880, city: "Atlanta, USA", genre: "Sci-Fi" },
+            { title: "Wednesday", lat: 45.9432, lng: 24.9668, city: "Romania", genre: "Comedy" },
+        ];
+
+        locations.forEach(loc => {
+            const marker = L.marker([loc.lat, loc.lng]).addTo(map);
+            marker.bindPopup(`
+                <div style="text-align:center;">
+                    <b style="color:#e50914;">${loc.title}</b><br>
+                    📍 ${loc.city}<br>
+                    🎬 ${loc.genre}
+                </div>
+            `);
+        });
+    </script>
+</body>
+</html>
